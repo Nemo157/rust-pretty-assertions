@@ -2,7 +2,7 @@
 //!
 //! When writing tests in Rust, you'll probably use `assert_eq!(a, b)` _a lot_.
 //!
-//! If such a test fails, it will present all the details of `a` and `b`. 
+//! If such a test fails, it will present all the details of `a` and `b`.
 //! But you have to spot the differences yourself, which is not always straightforward,
 //! like here:
 //!
@@ -78,10 +78,27 @@ pub use ansi_term::Style;
 #[doc(hidden)]
 pub struct Comparison(Changeset);
 
+fn reformat_strings(mut s: String) -> String {
+    if s.starts_with('"') {
+        s.insert(1, '\\');
+        s.insert(2, '\n');
+        s = s.replace("\\n", "\n");
+
+        if s.contains("\\\"") && !s.contains("\\\"#") {
+            s.insert(0, 'r');
+            s.insert(1, '#');
+            s.push('#');
+            s = s.replace("\\\"", "\"");
+        }
+    }
+
+    s
+}
+
 impl Comparison {
     pub fn new<TLeft: Debug, TRight: Debug>(left: &TLeft, right: &TRight) -> Comparison {
-        let left_dbg = format!("{:#?}", *left);
-        let right_dbg = format!("{:#?}", *right);
+        let left_dbg = reformat_strings(format!("{:#?}", *left));
+        let right_dbg = reformat_strings(format!("{:#?}", *right));
         let changeset = Changeset::new(&left_dbg, &right_dbg, "\n");
 
         Comparison(changeset)
