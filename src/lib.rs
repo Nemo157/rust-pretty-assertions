@@ -82,7 +82,9 @@ fn reformat_strings(mut s: String) -> String {
     if s.starts_with('"') {
         s.insert(1, '\\');
         s.insert(2, '\n');
+        s = s.replace("\\\\", "{slash}");
         s = s.replace("\\n", "\n");
+        s = s.replace("{slash}", "\\\\");
 
         if s.contains("\\\"") && !s.contains("\\\"#") {
             s.insert(0, 'r');
